@@ -28,7 +28,6 @@ String input = "";
 void setup() {
 
   Wire.begin(SDA_PIN, SCL_PIN);
-
   lcd.begin();
   lcd.backlight();
 
@@ -45,15 +44,25 @@ void setup() {
 }
 
 
+bool messageSent = false;
 void loop()
 {
-
-  char message[100];
   int msgSignal = 0;
-  receivePayment(message, sizeof(message), &msgSignal);
 
+  clientInfo *info;
+  char message[100];
+
+  receivePayment(message, sizeof(message), &msgSignal);
+  
   if (msgSignal == 1)
-    Serial.println(message);
+  {  
+    //Serial.println(message);
+    info = parsePayment(String(message));
+    Serial.print("\nName: "+info->clientName+ "\nPhone #: " +info->phoneNo + "\nAmt " + info->amt + "\n");
+    messageSent = true;
+    
+    delete info;
+  }
 
   delay(500);
 }
