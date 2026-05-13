@@ -2,6 +2,8 @@
 
 /**
  * receivePayment: Receives Payment information and reads the information.
+ * @msgLength: maximum number of characters in the mpesa statement information
+ * @msgSignal: check to see if there is information being received.
  * Return: Nothing
  */
  
@@ -29,13 +31,14 @@ void receivePayment(char *paymentStatement, int msgLength, bool *msgSignal) {
 /**
  * parsePayment: receives payment and parses info to extract,
  * name of client, client contact, and transaction detail.
- * @msg: mpesaMsg received
+ * @mpesaStatement: mpesa statement to be parsed.
+ * @responseStatus: alert switch incase message is corrupted.
  * Return: Details struct having the name of client,,
- * amount paid..
+ * amount paid.
  * 
  */
  
-void parsePayment(String mpesaStatement, paymentInfo *paymentInfo) {
+void parsePayment(String mpesaStatement, paymentInfo *paymentInfo, bool *responseStatus) {
  
   String clientName;
   String phoneNo;
@@ -43,9 +46,9 @@ void parsePayment(String mpesaStatement, paymentInfo *paymentInfo) {
 
 
   
-   clientName = extractClientName(mpesaStatement);
-   phoneNo = extractPhoneNo(mpesaStatement);
-   amt = extractAmt(mpesaStatement);
+   clientName = extractClientName(mpesaStatement, responseStatus);
+   phoneNo = extractPhoneNo(mpesaStatement, responseStatus);
+   amt = extractAmt(mpesaStatement, responseStatus);
    
    paymentInfo -> phoneNo = phoneNo;
    paymentInfo -> clientName = clientName;
@@ -54,10 +57,14 @@ void parsePayment(String mpesaStatement, paymentInfo *paymentInfo) {
 }
 
 /**
+ * extractAmt: from the mpesaStatement, retrieves the amount paid by client.
  * 
+ * @mpesaStatement: received mpesastatement to be parsed.
+ * @responseStatus: alert switch incase message is corrupted.
+ * Return: Amount paid.
  */
 
-String extractAmt(String mpesaStatement) {
+String extractAmt(String mpesaStatement, bool *responseStatus) {
   int startIndex;
   int endIndex;
   String amt;
@@ -74,12 +81,20 @@ String extractAmt(String mpesaStatement) {
     }
     else {
       amt = "Not Found";
+      *responseStatus = false;
     }
    return amt;
   }
 
 
-String extractClientName(String mpesaStatement) {
+
+/**
+ * extractClientName: retrieves client's name from mpesa statement.
+ * @mpesaStatement: mpesa statement containing client information.
+ * @responseStatus: alert switch incase message is corrupted.
+ * Return: Client's name
+ */
+String extractClientName(String mpesaStatement, bool *responseStatus) {
   int startIndex;
   int endIndex;
 
@@ -92,12 +107,22 @@ String extractClientName(String mpesaStatement) {
 
   endIndex  = second254 == -1 ? start254 : second254;
 
+  if (startIndex == -1 || endIndex == -1) {
+    return "Error Occured";
+    *responseStatus = false;
+    }
   return mpesaStatement.substring(startIndex + 6, endIndex);
   
 }
 
 
-String extractPhoneNo(String mpesaStatement) {
+/**
+ * extractPhoneNo: retrieves clients phone number.
+ * @mpesaStatement: mpesa statement containing clients information.
+ * @responseStatus: alert switch incase message is corrupted.
+ * Return: clients phone number.
+ */
+String extractPhoneNo(String mpesaStatement, bool *responseStatus) {
   int startIndex;
   int endIndex;
 
@@ -112,8 +137,14 @@ String extractPhoneNo(String mpesaStatement) {
   endIndex = mpesaStatement.indexOf(" on ");
 
   
+    if (startIndex == -1 || endIndex == -1) {
+      return "Error Occured";
+      *responseStatus = false;
+    }
   return mpesaStatement.substring(startIndex, endIndex);
   }
+
+
 
 /**
  * sendConfirmationPin: sends the confirmation pin upon receiving the payment message. 

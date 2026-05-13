@@ -49,6 +49,7 @@ void setup() {
 void loop()
 {
   bool msgSignal = false;
+  bool responseStatus = true;
   paymentInfo paymentInfo;
   char message[150];
 
@@ -57,10 +58,17 @@ void loop()
   if (msgSignal == true)
   {  
    
-    parsePayment(String(message), &paymentInfo);
-    Serial.println("Name: "+ paymentInfo.clientName);
-    Serial.println("Phone: " + paymentInfo.phoneNo);
-    Serial.println("Amount: " +  paymentInfo.amt);
+    parsePayment(String(message), &paymentInfo, &responseStatus);
+
+    if (responseStatus == true) {
+          Serial.println("Name: "+ paymentInfo.clientName);
+          Serial.println("Phone: " + paymentInfo.phoneNo);
+          Serial.println("Amount: " +  paymentInfo.amt);
+      } else 
+      {
+        Serial.println("Error Occured parsing information");
+        }
+
   }
 
   delay(1000);

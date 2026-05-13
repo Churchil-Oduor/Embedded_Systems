@@ -17,10 +17,10 @@ typedef struct paymentInfo {
 extern HardwareSerial sim800;
 void receivePayment(char *paymentStatement, int msgLength, bool *msgSignal);
 void sendConfirmationPin();
-void parsePayment(String mpesaStatement, paymentInfo *paymentInfo);
-String extractAmt(String mpesaStatement);
-String extractClientName(String mpesaStatement);
-String extractPhoneNo(String mpesaStatement);
+void parsePayment(String mpesaStatement, paymentInfo *paymentInfo, bool *responseStatus);
+String extractAmt(String mpesaStatement, bool *responseStatus);
+String extractClientName(String mpesaStatement, bool *responseStatus);
+String extractPhoneNo(String mpesaStatement, bool *responseStatus);
 
   
 #endif 
