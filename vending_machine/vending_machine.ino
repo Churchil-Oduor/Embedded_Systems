@@ -31,12 +31,13 @@ void setup() {
   lcd.begin();
   lcd.backlight();
 
-  Serial.begin(9600);
-  sim800.begin(9600, SERIAL_8N1, 25, 26);
+  Serial.begin(115200);
+  sim800.begin(115200, SERIAL_8N1, 25, 26);
 
   lcd.setCursor(0,0);
-  lcd.print("Enter:");
-
+  //lcd.print("Enter:");
+  
+  sim800.println("AT");
   sim800.println("AT+CMGF=1");
   delay(500);
   sim800.println("AT+CNMI=1,2,0,0,0");
@@ -44,28 +45,28 @@ void setup() {
 }
 
 
-bool messageSent = false;
+
 void loop()
 {
-  int msgSignal = 0;
-
-  clientInfo *info;
-  char message[100];
+  bool msgSignal = false;
+  paymentInfo paymentInfo;
+  char message[150];
 
   receivePayment(message, sizeof(message), &msgSignal);
   
-  if (msgSignal == 1)
+  if (msgSignal == true)
   {  
-    //Serial.println(message);
-    info = parsePayment(String(message));
-    Serial.print("\nName: "+info->clientName+ "\nPhone #: " +info->phoneNo + "\nAmt " + info->amt + "\n");
-    messageSent = true;
-    
-    delete info;
+   
+    parsePayment(String(message), &paymentInfo);
+    Serial.println("Name: "+ paymentInfo.clientName);
+    Serial.println("Phone: " + paymentInfo.phoneNo);
+    Serial.println("Amount: " +  paymentInfo.amt);
   }
 
-  delay(500);
+  delay(1000);
 }
+
+
 
 /*void loop() {
 

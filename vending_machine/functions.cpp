@@ -1,26 +1,28 @@
 #include "main.h"
 
 /**
- * receivePayment: Receives Payment information.
+ * receivePayment: Receives Payment information and reads the information.
  * Return: Nothing
  */
  
-void receivePayment(char *paymentStatement, int msgLength, int *msgSignal) {
-  
-  int index = 0;
-  
-  while(sim800.available()) {
-    
-    char c = sim800.read();
-    *msgSignal = 1;
+void receivePayment(char *paymentStatement, int msgLength, bool *msgSignal) {
 
-    index = sim800.readBytes(paymentStatement, msgLength - 1);
-    //paymentStatement[index++] = c;
+  int index;
+
+  index = 0;
+  
+  if (sim800.available()) {
     
-    if (index >= msgLength - 1)
-        break;
-    }
-    paymentStatement[index] = '\0';
+    *msgSignal = true;
+    
+    while(index <= msgLength - 1) {
+      index = sim800.readBytes(paymentStatement, msgLength - 1);
+      if (index >= msgLength - 1) {
+          paymentStatement[index] = '\0';
+          break;
+      }
+     }  
+  }
 }
 
 
@@ -33,21 +35,14 @@ void receivePayment(char *paymentStatement, int msgLength, int *msgSignal) {
  * 
  */
  
-clientInfo *parsePayment(String mpesaStatement) {
+void parsePayment(String mpesaStatement, paymentInfo *paymentInfo) {
  
   String clientName;
   String phoneNo;
   String amt;
-  clientInfo *paymentInfo;
-  int startIndex;
-  int endIndex;
 
 
-  startIndex = 0;
-  endIndex = 0;
-
-  paymentInfo = new clientInfo;
-
+  
    clientName = extractClientName(mpesaStatement);
    phoneNo = extractPhoneNo(mpesaStatement);
    amt = extractAmt(mpesaStatement);
@@ -56,7 +51,6 @@ clientInfo *parsePayment(String mpesaStatement) {
    paymentInfo -> clientName = clientName;
    paymentInfo -> amt = amt;
 
-   return paymentInfo;  
 }
 
 /**
@@ -86,43 +80,39 @@ String extractAmt(String mpesaStatement) {
 
 
 String extractClientName(String mpesaStatement) {
-  String clientName;
   int startIndex;
   int endIndex;
 
   startIndex = 0;
   endIndex = 0;
 
-  startIndex = mpesaStatement.indexOf("from ");
-  endIndex = mpesaStatement.indexOf("254", mpesaStatement.indexOf("254") + 1);
+  startIndex = mpesaStatement.indexOf(" from ");
+  int start254 = mpesaStatement.indexOf(" 254");
+  int second254 = mpesaStatement.indexOf(" 254", startIndex);
 
-  if (endIndex == -1)
-     endIndex = mpesaStatement.indexOf("254");
+  endIndex  = second254 == -1 ? start254 : second254;
 
-  clientName = mpesaStatement.substring(startIndex + 5, endIndex);
-
-  return clientName;
+  return mpesaStatement.substring(startIndex + 6, endIndex);
   
 }
 
 
 String extractPhoneNo(String mpesaStatement) {
-  String phoneNo;
   int startIndex;
   int endIndex;
+
 
   startIndex = 0;
   endIndex = 0;
 
-  startIndex = mpesaStatement.indexOf("254", mpesaStatement.indexOf("254") + 1) == -1 ? mpesaStatement.indexOf("254"): 
-  mpesaStatement.indexOf("254", mpesaStatement.indexOf("254") + 1);
+  int first254 = mpesaStatement.indexOf(" 254");
+  int next254 = mpesaStatement.indexOf(" 254", first254 + 12);
 
-
+  startIndex = (next254 == -1)? first254: next254;
   endIndex = mpesaStatement.indexOf(" on ");
-  phoneNo = mpesaStatement.substring(startIndex, endIndex);
 
-  return phoneNo;
   
+  return mpesaStatement.substring(startIndex, endIndex);
   }
 
 /**

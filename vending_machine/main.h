@@ -8,16 +8,16 @@
 
 
 
-typedef struct clientInfo {
+typedef struct paymentInfo {
   String clientName;
   String phoneNo;
   String amt;
-  } clientInfo;
+  } paymentInfo;
 
 extern HardwareSerial sim800;
-void receivePayment(char *paymentStatement, int msgLength, int *msgSignal);
+void receivePayment(char *paymentStatement, int msgLength, bool *msgSignal);
 void sendConfirmationPin();
-clientInfo *parsePayment(String mpesaStatement);
+void parsePayment(String mpesaStatement, paymentInfo *paymentInfo);
 String extractAmt(String mpesaStatement);
 String extractClientName(String mpesaStatement);
 String extractPhoneNo(String mpesaStatement);
