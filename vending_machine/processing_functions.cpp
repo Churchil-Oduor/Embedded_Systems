@@ -53,6 +53,7 @@ void parsePayment(String mpesaStatement, paymentInfo *paymentInfo, bool *respons
    paymentInfo -> phoneNo = phoneNo;
    paymentInfo -> clientName = clientName;
    paymentInfo -> amt = amt;
+   paymentInfo -> code = generateCode();
 
 }
 
@@ -68,6 +69,7 @@ String extractAmt(String mpesaStatement, bool *responseStatus) {
   int startIndex;
   int endIndex;
   String amt;
+
 
   startIndex = 0;
   endIndex = 0;
@@ -125,6 +127,7 @@ String extractClientName(String mpesaStatement, bool *responseStatus) {
 String extractPhoneNo(String mpesaStatement, bool *responseStatus) {
   int startIndex;
   int endIndex;
+  String phoneNo;
 
 
   startIndex = 0;
@@ -133,26 +136,44 @@ String extractPhoneNo(String mpesaStatement, bool *responseStatus) {
   int first254 = mpesaStatement.indexOf(" 254");
   int next254 = mpesaStatement.indexOf(" 254", first254 + 12);
 
-  startIndex = (next254 == -1)? first254: next254;
+  startIndex = (next254 == -1)? first254 + 1: next254 + 1;
   endIndex = mpesaStatement.indexOf(" on ");
-
   
     if (startIndex == -1 || endIndex == -1) {
       return "Error Occured";
       *responseStatus = false;
     }
-  return mpesaStatement.substring(startIndex, endIndex);
+
+    phoneNo = "+" + mpesaStatement.substring(startIndex, endIndex);
+    phoneNo.replace(" ", "");
+    
+  return phoneNo;
   }
 
 
 
 /**
- * sendConfirmationPin: sends the confirmation pin upon receiving the payment message. 
- * Return:
+ * sendConfirmationPin: sends the confirmation pin upon receiving the payment message.
+ * @paymentInfo: clients info for message sending.
+ * @msgSentClient: a check to ascertain message has been sent.
  * 
  */
  
-void sendConfirmationPin() {
+void sendMsgCode(paymentInfo paymentInfo, bool *msgSentToClient)
+{
   
+    String message = "Karibu " + paymentInfo.clientName + " to Water Vendor.\n Use the code " + paymentInfo.code + " for dispensing.\n Water balance " + "3-Litres";
+
+    sim800.print("AT+CMGS=\"");
+    sim800.print(paymentInfo.phoneNo);
+    sim800.println("\"");
   
+    delay(1000);
+    sim800.print(message);
+    sim800.write(26);
+
+    Serial.write(sim800.read());
+    delay(1000);
+  
+    *msgSentToClient = true;
 }

@@ -31,8 +31,8 @@ void setup() {
   lcd.begin();
   lcd.backlight();
 
-  Serial.begin(115200);
-  sim800.begin(115200, SERIAL_8N1, 25, 26);
+  Serial.begin(9600);
+  sim800.begin(9600, SERIAL_8N1, 25, 26);
 
   lcd.setCursor(0,0);
   //lcd.print("Enter:");
@@ -49,9 +49,11 @@ void setup() {
 void loop()
 {
   bool msgSignal = false;
+  bool msgSentToClient = false;
   bool responseStatus = true;
   paymentInfo paymentInfo;
-  char message[150];
+  char message[160];
+  
 
   receivePayment(message, sizeof(message), &msgSignal);
   
@@ -64,12 +66,19 @@ void loop()
           Serial.println("Name: "+ paymentInfo.clientName);
           Serial.println("Phone: " + paymentInfo.phoneNo);
           Serial.println("Amount: " +  paymentInfo.amt);
+	        Serial.println("Code:" + paymentInfo.code);	
+          lcd.clear();
+          lcd.print(paymentInfo.clientName);
+          sendMsgCode(paymentInfo, &msgSentToClient);
       } else 
       {
-        Serial.println("Error Occured parsing information");
+        Serial.println("");
         }
-
   }
+
+  if (msgSentToClient) {
+    
+    }
 
   delay(1000);
 }
