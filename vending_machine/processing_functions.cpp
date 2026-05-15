@@ -171,8 +171,6 @@ void sendMsgCode(paymentInfo paymentInfo, bool *msgSentToClient)
     delay(1000);
     sim800.print(message);
     sim800.write(26);
-
-    Serial.write(sim800.read());
     delay(1000);
   
     *msgSentToClient = true;

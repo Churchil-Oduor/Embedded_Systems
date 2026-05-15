@@ -52,7 +52,7 @@ void loop()
   bool msgSentToClient = false;
   bool responseStatus = true;
   paymentInfo paymentInfo;
-  char message[160];
+  char message[140];
   
 
   receivePayment(message, sizeof(message), &msgSignal);
@@ -66,7 +66,7 @@ void loop()
           Serial.println("Name: "+ paymentInfo.clientName);
           Serial.println("Phone: " + paymentInfo.phoneNo);
           Serial.println("Amount: " +  paymentInfo.amt);
-	        Serial.println("Code:" + paymentInfo.code);	
+	        Serial.println("Code:" + paymentInfo.code);
           lcd.clear();
           lcd.print(paymentInfo.clientName);
           sendMsgCode(paymentInfo, &msgSentToClient);
