@@ -89,20 +89,13 @@ void loop()
   paymentInfo paymentInfo;
   String message;
   
-
-
-   if (sim800.available())
-      digitalWrite(12, HIGH);
-    else
-      digitalWrite(12, LOW);
-  
-  receivePayment(&message, sizeof(message), &msgSignal);
+  receivePayment(&message, &msgSignal);
 
   if (msgSignal == true)
   {  
-   
+    digitalWrite(12, HIGH);
     parsePayment(String(message), &paymentInfo, &responseStatus);
-
+    digitalWrite(12, LOW);
    
 
     if (responseStatus == true) {
@@ -125,43 +118,3 @@ void loop()
   delay(1000);
   
 }
-
-
-
-/*void loop() {
-
-  char key = keypad.getKey();
-
-  if (key) {
-
-    Serial.print(key);
-
-    if (key == '*') {
-      input = "";
-      lcd.clear();
-      lcd.print("Enter:");
-    }
-
-    else if (key == '#') {
-      lcd.clear();
-      lcd.print("Sending...");
-
-      sendSMS(input, "Hello Nelson, Water Vendor says Hi!");
-
-      delay(2000);
-
-      input = "";
-      lcd.clear();
-      lcd.print("Enter:");
-    }
-
-    else {
-      input += key;
-
-      lcd.setCursor(0,1);
-      lcd.print("                ");
-      lcd.setCursor(0,1);
-      lcd.print(input);
-    }
-  }
-}*/

@@ -2,30 +2,15 @@
 
 /**
  * receivePayment: Receives Payment information and reads the information.
- * @msgLength: maximum number of characters in the mpesa statement information
  * @msgSignal: check to see if there is information being received.
  * Return: Nothing
  */
  
-void receivePayment(String *paymentStatement, int msgLength, bool *msgSignal) {
+void receivePayment(String *paymentStatement, bool *msgSignal) {
 
- /* int index;
-
-  index = 0;*/
-  
   if (sim800.available()) {
     *paymentStatement = sim800.readString();
     *msgSignal = true;
-   /**  while(index <= msgLength - 1) {
-      //index = sim800.readBytes(paymentStatement, msgLength - 1);
-    
-      
-     if (index >= msgLength - 1) {
-          paymentStatement[index] = '\0';
-          *msgSignal = true;
-          break;
-      }
-     } **/ 
   }
 }
 
