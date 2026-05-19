@@ -27,20 +27,55 @@ String input = "";
 
 void setup() {
 
+  pinMode(12, OUTPUT);
+  Serial.begin(9600);
+  sim800.begin(9600, SERIAL_8N1, 25, 26);
+  
   Wire.begin(SDA_PIN, SCL_PIN);
   lcd.begin();
   lcd.backlight();
-
-  Serial.begin(9600);
-  sim800.begin(9600, SERIAL_8N1, 25, 26);
-
   lcd.setCursor(0,0);
-  //lcd.print("Enter:");
-  
+  lcd.print("sim800 booting...");
+
+
+  //attention
   sim800.println("AT");
+  Serial.println(sim800.readString());
+  delay(1000);
+
+
+  //sim card status check
+  sim800.println("AT+CPIN?");
+  Serial.println(sim800.readString());
+  delay(1000);
+
+
+  //network registration status.
+  sim800.println("AT+CREG?");
+  Serial.println(sim800.readString());
+  delay(1000);
+
+
+  //signal strength check
+  sim800.println("AT+CSQ");
+  Serial.println(sim800.readString());
+  delay(1000);
+
+  
+  //setting mode to sms
   sim800.println("AT+CMGF=1");
+ // Serial.println(sim800.readString());
   delay(500);
+
+
+  
   sim800.println("AT+CNMI=1,2,0,0,0");
+ // Serial.println(sim800.readString());
+  delay(500);
+
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Ready..");
   delay(500);
 }
 
@@ -52,15 +87,23 @@ void loop()
   bool msgSentToClient = false;
   bool responseStatus = true;
   paymentInfo paymentInfo;
-  char message[140];
+  String message;
   
 
-  receivePayment(message, sizeof(message), &msgSignal);
+
+   if (sim800.available())
+      digitalWrite(12, HIGH);
+    else
+      digitalWrite(12, LOW);
   
+  receivePayment(&message, sizeof(message), &msgSignal);
+
   if (msgSignal == true)
   {  
    
     parsePayment(String(message), &paymentInfo, &responseStatus);
+
+   
 
     if (responseStatus == true) {
           Serial.println("Name: "+ paymentInfo.clientName);
@@ -79,8 +122,8 @@ void loop()
   if (msgSentToClient) {
     
     }
-
   delay(1000);
+  
 }
 
 

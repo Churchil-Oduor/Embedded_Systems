@@ -7,23 +7,25 @@
  * Return: Nothing
  */
  
-void receivePayment(char *paymentStatement, int msgLength, bool *msgSignal) {
+void receivePayment(String *paymentStatement, int msgLength, bool *msgSignal) {
 
-  int index;
+ /* int index;
 
-  index = 0;
+  index = 0;*/
   
   if (sim800.available()) {
-    
+    *paymentStatement = sim800.readString();
     *msgSignal = true;
+   /**  while(index <= msgLength - 1) {
+      //index = sim800.readBytes(paymentStatement, msgLength - 1);
     
-    while(index <= msgLength - 1) {
-      index = sim800.readBytes(paymentStatement, msgLength - 1);
-      if (index >= msgLength - 1) {
+      
+     if (index >= msgLength - 1) {
           paymentStatement[index] = '\0';
+          *msgSignal = true;
           break;
       }
-     }  
+     } **/ 
   }
 }
 
@@ -81,3 +83,30 @@ void sendMsgCode(paymentInfo paymentInfo, bool *msgSentToClient)
   
     *msgSentToClient = true;
 }
+
+
+
+/**
+ * verifyCode: verifies code shared by client.
+ * @clientsCode: Code entered by client.
+ * @code: systems assigned code to client.
+ * Return: is code is correct return true else false.
+ */
+
+bool verifyCode(String code, String clientCode) {
+
+  if (code == clientCode)
+    return true;
+
+  return false;
+}
+
+
+
+
+
+
+
+
+
+  
