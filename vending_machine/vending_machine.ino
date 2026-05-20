@@ -2,8 +2,8 @@ HardwareSerial sim800(2);
 
 #include "main.h"
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
 
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 const int SDA_PIN = 18;
 const int SCL_PIN = 19;
 
@@ -71,12 +71,9 @@ void setup() {
   
   sim800.println("AT+CNMI=1,2,0,0,0");
  // Serial.println(sim800.readString());
-  delay(500);
+  delay(1000);
 
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("Ready..");
-  delay(500);
+  delay(1000);
 }
 
 
@@ -88,6 +85,13 @@ void loop()
   bool responseStatus = true;
   paymentInfo paymentInfo;
   String message;
+
+  
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Ready!");
+  lcd.setCursor(0, 1);
+  lcd.print("Make Payment");
   
   receivePayment(&message, &msgSignal);
 
@@ -96,25 +100,68 @@ void loop()
     digitalWrite(12, HIGH);
     parsePayment(String(message), &paymentInfo, &responseStatus);
     digitalWrite(12, LOW);
-   
-
+ 
     if (responseStatus == true) {
-          Serial.println("Name: "+ paymentInfo.clientName);
-          Serial.println("Phone: " + paymentInfo.phoneNo);
-          Serial.println("Amount: " +  paymentInfo.amt);
-	        Serial.println("Code:" + paymentInfo.code);
-          lcd.clear();
-          lcd.print(paymentInfo.clientName);
           sendMsgCode(paymentInfo, &msgSentToClient);
-      } else 
-      {
-        Serial.println("");
-        }
+    }
   }
 
-  if (msgSentToClient) {
+  if (msgSentToClient)
+  {
+
+    bool clientPaymentVerified = false;
+    bool doneDispensing = false;
     
-    }
+    lcd.clear();
+    lcd.print("Payment Received!");
+    delay(3000);
+    lcd.clear();
+    clientPaymentVerified = verifyClient(paymentInfo);
+
+    while (!doneDispensing) {
+
+       if (clientPaymentVerified){
+      /**dispense water.
+       * deduct the amount from client.
+       * return to client the balance of water available with thank you message
+      **/
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Dispensing...");
+
+      for (int count = 0; count <= 100; count++)
+      {
+        lcd.setCursor(0, 1);
+        lcd.print(String(count) + "%");
+        delay(300);
+        
+      }
+
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Done Dispensing!");
+      delay(2000);
+      lcd.setCursor(0, 1);
+      lcd.print("Karibu Tena");
+      doneDispensing = true;
+      delay(1000);
+      }
+
+    else {
+
+      /**
+       * prompt re-entry of pin by client
+       * 
+      **/
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Wrong Code");
+      lcd.setCursor(0, 1);
+      lcd.print("Try Again!");
+      delay(1000);
+     }
+   }
+  }
   delay(1000);
   
 }
